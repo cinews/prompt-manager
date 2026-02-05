@@ -10,9 +10,9 @@ export const Sidebar = ({
     totalPrompts
 }) => {
     return (
-        <div className="w-full lg:w-72 bg-white border-r border-gray-100 flex-shrink-0 flex flex-col h-full">
-            <div className="p-6 border-b border-gray-100">
-                <div className="flex items-center gap-3 mb-8">
+        <div className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-gray-100 flex-shrink-0 flex flex-col h-auto md:h-full">
+            <div className="p-4 md:p-6 border-b border-gray-100">
+                <div className="flex items-center gap-3 mb-4 md:mb-8">
                     <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
                         <LayoutGrid className="w-6 h-6" />
                     </div>

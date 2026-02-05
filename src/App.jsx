@@ -86,7 +86,7 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans text-gray-900">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-50 font-sans text-gray-900">
       <Sidebar
         categories={categories}
         selectedCategory={selectedCategory}
