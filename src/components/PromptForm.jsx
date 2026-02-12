@@ -10,6 +10,7 @@ const CATEGORIES = [
     { value: '디자인/창작', label: '디자인/창작' },
     { value: '마케팅', label: '마케팅' },
     { value: '비즈니스생산성', label: '비즈니스생산성' },
+    { value: 'SW/개발', label: 'SW/개발' },
     { value: '일상생활', label: '일상생활' },
     { value: '콘텐츠제작', label: '콘텐츠제작' },
     { value: '기타', label: '기타' },
