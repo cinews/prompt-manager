@@ -122,6 +122,17 @@ function App() {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Error: </strong>
+              <span className="block sm:inline">{error.message || '데이터를 불러오는데 실패했습니다.'}</span>
+              <p className="text-sm mt-1 text-red-600">
+                (Vercel 환경 변수 설정을 확인해주세요.)
+              </p>
+            </div>
+          )}
+
           {/* Top Controls: Search + Favorites */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
