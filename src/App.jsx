@@ -9,7 +9,7 @@ import { usePrompts } from './hooks/usePrompts';
 import { cn } from './utils/cn';
 
 function App() {
-  const { prompts, addPrompt, editPrompt, removePrompt, toggleLike } = usePrompts();
+  const { prompts, addPrompt, editPrompt, removePrompt, toggleLike, error } = usePrompts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
