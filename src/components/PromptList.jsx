@@ -23,9 +23,9 @@ export const PromptList = ({ prompts, onClick, onEdit, onDelete, onLike }) => {
                 <div className="bg-gray-50 p-6 rounded-full mb-4">
                     <span className="text-4xl">📭</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">No prompts found</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">검색 결과가 없습니다</h3>
                 <p className="text-gray-500 max-w-sm">
-                    Try adjusting your search or create a new prompt to get started.
+                    다른 키워드로 검색하거나 새로운 프롬프트를 등록해보세요.
                 </p>
             </div>
         );

@@ -32,8 +32,8 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         className="fixed inset-0 z-50 flex items-center justify-center p-4"
                     >
-                        <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                        <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-between p-6 border-b border-gray-100 flex-shrink-0">
                                 <h2 className="text-xl font-bold text-gray-900">{title}</h2>
                                 <button
                                     onClick={onClose}
@@ -42,7 +42,7 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            <div className="p-6">
+                            <div className="p-6 overflow-y-auto">
                                 {children}
                             </div>
                         </div>

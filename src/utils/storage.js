@@ -1,83 +1,110 @@
+import { supabase } from '../lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
-const STORAGE_KEY = 'prompt-manager-data';
+// Helper to map DB row to App format
+const fromDB = (row) => ({
+    ...row,
+    isLiked: row.is_liked,
+    createdAt: row.created_at,
+    // ensure tags is an array
+    tags: Array.isArray(row.tags) ? row.tags : []
+});
 
-const INITIAL_DATA = [
-    {
-        id: '1',
-        title: 'Code Refactoring Expert',
-        category: 'Programming',
-        content: 'You are an expert software engineer. Review the following code and suggest improvements for readability, performance, and security.',
-        usage: 'Paste your code after the prompt.',
-        tags: ['coding', 'refactoring', 'clean-code'],
-        isLiked: true,
-        createdAt: Date.now(),
-    },
-    {
-        id: '2',
-        title: 'Creative Story Starter',
-        category: 'Creative Writing',
-        content: 'Write a short story starting with the sentence: "The clock struck thirteen, and the mismatched socks in the dryer began to sing."',
-        usage: 'Use this to break writer\'s block.',
-        tags: ['story', 'creative', 'fiction'],
-        isLiked: false,
-        createdAt: Date.now() - 10000,
-    },
-    {
-        id: '3',
-        title: 'Email Polisher',
-        category: 'Marketing',
-        content: 'Rewrite the following email to be more professional, concise, and persuasive.',
-        usage: 'Paste your draft email.',
-        tags: ['email', 'business', 'communication'],
-        isLiked: false,
-        createdAt: Date.now() - 20000,
-    }
-];
-
-export const getPrompts = () => {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DATA));
-        return INITIAL_DATA;
-    }
-    return JSON.parse(data);
+// Helper to map App data to DB format
+const toDB = (data) => {
+    const { isLiked, createdAt, ...rest } = data;
+    return {
+        ...rest,
+        is_liked: isLiked,
+        created_at: createdAt
+    };
 };
 
-export const savePrompts = (prompts) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
+export const getPrompts = async () => {
+    const { data, error } = await supabase
+        .from('prompts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data.map(fromDB);
 };
 
-export const createPrompt = (promptData) => {
+export const createPrompt = async (promptData) => {
     const newPrompt = {
         id: uuidv4(),
-        createdAt: Date.now(),
-        isLiked: false,
+        created_at: new Date().toISOString(), // Use ISO string for DB timestamptz
+        is_liked: false,
         ...promptData,
+        // Ensure toDB mapping is respected if we pass camelCase props, but here we construct explicitly
+        // promptData might have camelCase, so let's handle it carefully
     };
-    const prompts = getPrompts();
-    const updatedPrompts = [newPrompt, ...prompts];
-    savePrompts(updatedPrompts);
-    return updatedPrompts;
+
+    // Prepare payload. promptData usually has: title, category, content, usage, tags.
+    const payload = {
+        id: newPrompt.id,
+        title: promptData.title,
+        category: promptData.category,
+        content: promptData.content,
+        usage: promptData.usage,
+        tags: promptData.tags,
+        is_liked: false,
+        created_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+        .from('prompts')
+        .insert([payload])
+        .select()
+        .single();
+
+    if (error) throw error;
+    return fromDB(data);
 };
 
-export const updatePrompt = (updatedPrompt) => {
-    const prompts = getPrompts();
-    const newPrompts = prompts.map((p) => (p.id === updatedPrompt.id ? updatedPrompt : p));
-    savePrompts(newPrompts);
-    return newPrompts;
+export const updatePrompt = async (updatedPrompt) => {
+    const payload = toDB(updatedPrompt);
+    // remove ID from payload so we don't try to update it (though Supabase ignores it usually)
+    const { id, ...updates } = payload;
+
+    const { data, error } = await supabase
+        .from('prompts')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return fromDB(data);
 };
 
-export const deletePrompt = (id) => {
-    const prompts = getPrompts();
-    const newPrompts = prompts.filter((p) => p.id !== id);
-    savePrompts(newPrompts);
-    return newPrompts;
+export const deletePrompt = async (id) => {
+    const { error } = await supabase
+        .from('prompts')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw error;
+    return id;
 };
 
-export const toggleLikePrompt = (id) => {
-    const prompts = getPrompts();
-    const newPrompts = prompts.map(p => p.id === id ? { ...p, isLiked: !p.isLiked } : p);
-    savePrompts(newPrompts);
-    return newPrompts;
-}
+export const toggleLikePrompt = async (id) => {
+    // First get current status
+    const { data: current, error: fetchError } = await supabase
+        .from('prompts')
+        .select('is_liked')
+        .eq('id', id)
+        .single();
+
+    if (fetchError) throw fetchError;
+
+    const { data, error } = await supabase
+        .from('prompts')
+        .update({ is_liked: !current.is_liked })
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return fromDB(data);
+};

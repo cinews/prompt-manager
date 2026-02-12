@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, LayoutGrid, Search, Heart } from 'lucide-react';
+import { Plus, LayoutGrid, Search, Heart, X } from 'lucide-react';
 import { PromptList } from './components/PromptList';
 import { PromptForm } from './components/PromptForm';
 import { PromptDetailModal } from './components/PromptDetailModal';
@@ -63,21 +63,32 @@ function App() {
     setViewingPrompt(prompt);
   };
 
-  const handleFormSubmit = (data) => {
-    if (editingPrompt) {
-      editPrompt({ ...editingPrompt, ...data });
-    } else {
-      addPrompt(data);
-      setSearchQuery('');
-      setSelectedCategory('All');
+  const handleFormSubmit = async (data) => {
+    try {
+      if (editingPrompt) {
+        await editPrompt({ ...editingPrompt, ...data });
+      } else {
+        const newPrompt = await addPrompt(data);
+        setSearchQuery('');
+        setSelectedCategory('All');
+        setViewingPrompt(newPrompt);
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Operation failed", error);
+      alert("적용 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (confirm('정말 이 프롬프트를 삭제하시겠습니까?')) {
-      removePrompt(id);
-      if (viewingPrompt?.id === id) setViewingPrompt(null);
+      try {
+        await removePrompt(id);
+        if (viewingPrompt?.id === id) setViewingPrompt(null);
+      } catch (error) {
+        console.error("Delete failed", error);
+        alert("삭제 중 오류가 발생했습니다.");
+      }
     }
   };
 
@@ -86,7 +97,14 @@ function App() {
       {/* 1. Header Area */}
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => {
+              setSelectedCategory('All');
+              setSearchQuery('');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
               <LayoutGrid className="w-5 h-5" />
             </div>
@@ -113,8 +131,17 @@ function App() {
                 placeholder="제목, 태그, 내용 검색..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="검색어 초기화"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
             <button
               onClick={() => setSelectedCategory('Favorites')}
@@ -174,18 +201,10 @@ function App() {
 
           {/* Prompt List */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">
-                {selectedCategory === 'All' ? '전체 프롬프트' :
-                  selectedCategory === 'Favorites' ? '즐겨찾기 목록' :
-                    `${selectedCategory}`}
-              </h2>
-              <span className="text-sm text-gray-500">
-                {filteredPrompts.length}개의 프롬프트
-              </span>
-            </div>
+
 
             <PromptList
+              key={selectedCategory + searchQuery}
               prompts={filteredPrompts}
               onClick={handleDetailOpen}
               onEdit={handleEditOpen}
