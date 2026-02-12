@@ -3,29 +3,35 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Fail gracefully if environment variables are missing
-if (!supabaseUrl || !supabaseAnonKey) {
-    console.error(
-        'Supabase environment variables are missing. Please check your .env file or Vercel project settings.'
-    );
-}
+// Debug log to check env vars
+console.log('Supabase Config:', {
+    urlExists: !!supabaseUrl,
+    keyExists: !!supabaseAnonKey
+});
 
-// Dummy client that supports chaining and returns an error
 const createDummyClient = () => {
-    const dummyBuilder = {
-        select: () => dummyBuilder,
-        insert: () => dummyBuilder,
-        update: () => dummyBuilder,
-        delete: () => dummyBuilder,
-        eq: () => dummyBuilder,
-        single: () => dummyBuilder,
-        order: () => dummyBuilder,
-        limit: () => dummyBuilder,
-        then: (resolve) => resolve({ data: null, error: { message: 'Supabase environment variables missing' } }),
-    };
+    // Use a variable to safe-guard against circular reference issues during initialization
+    const builder = {};
+
+    // Assign methods to the object
+    Object.assign(builder, {
+        select: () => builder,
+        insert: () => builder,
+        update: () => builder,
+        delete: () => builder,
+        eq: () => builder,
+        single: () => builder,
+        order: () => builder,
+        limit: () => builder,
+        // Return a promise-like object that resolves to an error
+        then: (resolve) => resolve({
+            data: null,
+            error: { message: 'Supabase environment variables are missing. Please check your .env file.' }
+        }),
+    });
 
     return {
-        from: () => dummyBuilder,
+        from: () => builder,
     };
 };
 
