@@ -10,14 +10,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
     );
 }
 
+// Dummy client that supports chaining and returns an error
+const createDummyClient = () => {
+    const dummyBuilder = {
+        select: () => dummyBuilder,
+        insert: () => dummyBuilder,
+        update: () => dummyBuilder,
+        delete: () => dummyBuilder,
+        eq: () => dummyBuilder,
+        single: () => dummyBuilder,
+        order: () => dummyBuilder,
+        limit: () => dummyBuilder,
+        then: (resolve) => resolve({ data: null, error: { message: 'Supabase environment variables missing' } }),
+    };
+
+    return {
+        from: () => dummyBuilder,
+    };
+};
+
 export const supabase =
     supabaseUrl && supabaseAnonKey
         ? createClient(supabaseUrl, supabaseAnonKey)
-        : {
-            from: () => ({
-                select: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
-                insert: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }) }) }),
-                update: () => ({ eq: () => ({ select: () => ({ single: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }) }) }) }),
-                delete: () => ({ eq: () => Promise.resolve({ error: { message: 'Supabase not configured' } }) }),
-            }),
-        };
+        : createDummyClient();
