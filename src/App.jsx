@@ -16,6 +16,28 @@ function App() {
   const [editingPrompt, setEditingPrompt] = useState(null);
   const [viewingPrompt, setViewingPrompt] = useState(null);
 
+  // Admin State
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return sessionStorage.getItem('isAdmin') === 'true';
+  });
+
+  const handleAdminLogin = () => {
+    const password = window.prompt("관리자 비밀번호를 입력하세요:");
+    if (password && password.trim() === "Nanajin72@") { // Simple password check
+      sessionStorage.setItem('isAdmin', 'true');
+      setIsAdmin(true);
+      alert("관리자로 로그인되었습니다.");
+    } else if (password !== null) {
+      alert("비밀번호가 올바르지 않습니다.");
+    }
+  };
+
+  const handleAdminLogout = () => {
+    sessionStorage.removeItem('isAdmin');
+    setIsAdmin(false);
+    alert("로그아웃되었습니다.");
+  };
+
   // Filter Logic
   const filteredPrompts = useMemo(() => {
     return prompts.filter((prompt) => {
@@ -76,7 +98,7 @@ function App() {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Operation failed", error);
-      alert("적용 중 오류가 발생했습니다. 다시 시도해주세요.");
+      alert(`오류가 발생했습니다: ${error.message || "알 수 없는 오류"}`);
     }
   };
 
@@ -111,10 +133,30 @@ function App() {
             <h1 className="text-xl font-bold text-gray-900 tracking-tight">Prompt Manager</h1>
           </div>
 
-          <Button onClick={handleCreateOpen}>
-            <Plus className="w-5 h-5 mr-2" />
-            새 프롬프트
-          </Button>
+          <div className="flex items-center gap-3">
+            {isAdmin ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-indigo-600 font-medium hidden sm:inline-block">관리자 모드</span>
+                <Button onClick={handleCreateOpen}>
+                  <Plus className="w-5 h-5 mr-2" />
+                  새 프롬프트
+                </Button>
+                <button
+                  onClick={handleAdminLogout}
+                  className="text-sm text-gray-500 hover:text-gray-700 underline"
+                >
+                  로그아웃
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleAdminLogin}
+                className="text-sm text-gray-400 hover:text-gray-600"
+              >
+                관리자 로그인
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -221,6 +263,7 @@ function App() {
               onEdit={handleEditOpen}
               onDelete={handleDelete}
               onLike={toggleLike}
+              isAdmin={isAdmin}
             />
           </div>
         </div>
@@ -247,6 +290,7 @@ function App() {
         onEdit={handleEditOpen}
         onDelete={handleDelete}
         onLike={toggleLike}
+        isAdmin={isAdmin}
       />
     </div>
   );

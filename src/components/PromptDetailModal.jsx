@@ -4,7 +4,7 @@ import { Copy, ExternalLink, Heart, Edit2, Trash2 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useState } from 'react';
 
-export const PromptDetailModal = ({ isOpen, onClose, prompt, onEdit, onDelete, onLike }) => {
+export const PromptDetailModal = ({ isOpen, onClose, prompt, onEdit, onDelete, onLike, isAdmin }) => {
     const [copied, setCopied] = useState(false);
 
     if (!prompt) return null;
@@ -83,16 +83,18 @@ export const PromptDetailModal = ({ isOpen, onClose, prompt, onEdit, onDelete, o
                 </div>
 
                 {/* Actions Footer */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <Button variant="secondary" onClick={() => onEdit(prompt)}>
-                        <Edit2 className="w-4 h-4 mr-2" />
-                        수정
-                    </Button>
-                    <Button variant="danger" onClick={() => { onDelete(prompt.id); onClose(); }}>
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        삭제
-                    </Button>
-                </div>
+                {isAdmin && (
+                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <Button variant="secondary" onClick={() => onEdit(prompt)}>
+                            <Edit2 className="w-4 h-4 mr-2" />
+                            수정
+                        </Button>
+                        <Button variant="danger" onClick={() => { onDelete(prompt.id); onClose(); }}>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            삭제
+                        </Button>
+                    </div>
+                )}
             </div>
         </Modal>
     );

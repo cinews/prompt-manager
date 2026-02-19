@@ -16,7 +16,7 @@ const item = {
     show: { opacity: 1, y: 0 }
 };
 
-export const PromptList = ({ prompts, onClick, onEdit, onDelete, onLike }) => {
+export const PromptList = ({ prompts, onClick, onEdit, onDelete, onLike, isAdmin }) => {
     if (prompts.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -46,6 +46,7 @@ export const PromptList = ({ prompts, onClick, onEdit, onDelete, onLike }) => {
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onLike={onLike}
+                        isAdmin={isAdmin}
                     />
                 </motion.div>
             ))}

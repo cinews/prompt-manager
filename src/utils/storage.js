@@ -6,18 +6,24 @@ const fromDB = (row) => ({
     ...row,
     isLiked: row.is_liked,
     createdAt: row.created_at,
+    referenceUrl: row.reference_url,
     // ensure tags is an array
     tags: Array.isArray(row.tags) ? row.tags : []
 });
 
 // Helper to map App data to DB format
 const toDB = (data) => {
-    const { isLiked, createdAt, ...rest } = data;
-    return {
+    const { isLiked, createdAt, referenceUrl, ...rest } = data;
+    const payload = {
         ...rest,
         is_liked: isLiked,
         created_at: createdAt
     };
+    // Only include reference_url if it has a value to avoid errors if column is missing
+    if (referenceUrl) {
+        payload.reference_url = referenceUrl;
+    }
+    return payload;
 };
 
 export const getPrompts = async () => {
@@ -51,6 +57,11 @@ export const createPrompt = async (promptData) => {
         is_liked: false,
         created_at: new Date().toISOString()
     };
+
+    // Only add reference_url if present
+    if (promptData.referenceUrl) {
+        payload.reference_url = promptData.referenceUrl;
+    }
 
     const { data, error } = await supabase
         .from('prompts')

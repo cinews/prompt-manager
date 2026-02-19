@@ -3,7 +3,7 @@ import { Button } from './ui/Button';
 import { cn } from '../utils/cn';
 import { useState } from 'react';
 
-export const PromptCard = ({ prompt, onClick, onEdit, onDelete, onLike }) => {
+export const PromptCard = ({ prompt, onClick, onEdit, onDelete, onLike, isAdmin }) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = (e) => {
@@ -71,12 +71,16 @@ export const PromptCard = ({ prompt, onClick, onEdit, onDelete, onLike }) => {
                     <Button variant="ghost" size="icon" onClick={handleCopy} title="내용 복사">
                         <Copy className={cn("w-4 h-4", copied && "text-green-500")} />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onEdit(prompt); }} title="수정">
-                        <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDelete(prompt.id); }} title="삭제" className="text-red-400 hover:text-red-600 hover:bg-red-50">
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {isAdmin && (
+                        <>
+                            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onEdit(prompt); }} title="수정">
+                                <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDelete(prompt.id); }} title="삭제" className="text-red-400 hover:text-red-600 hover:bg-red-50">
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
